@@ -59,3 +59,4 @@ def conv_text(bina) :
                 X+=ALPHABET[key]
                 
     return X
+

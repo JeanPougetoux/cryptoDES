@@ -18,7 +18,7 @@ def askForText(cType) :
             if not os.path.isfile(entry) :
                 print("Le fichier de ce nom n'existe pas !\n")
             else :
-                f=open(entry, "r")
+                f=open(entry, "r", encoding='utf-8')
                 txt=f.read()
                 if(len(txt) == 0) :
                     print("Le fichier existe mais ne contient aucun caractère !\n")
@@ -43,7 +43,7 @@ def askForKey() :
             if not os.path.isfile(entry) :
                 print("Le fichier de ce nom n'existe pas !\n")
             else :
-                f=open(entry, "r")
+                f=open(entry, "r", encoding='utf-8')
                 txt=f.read()
                 if(len(txt) != 64) :
                     print("Le fichier existe mais la clef contenu ne contient pas exactement 64 bits !\n")
@@ -85,7 +85,7 @@ def displayToUser(txtAfterTreatment) :
     elif (output == 0) :
         print(txtAfterTreatment)
     else :
-        f=open(output,"w+")
+        f=open(output,"w+", encoding='utf-8')
         f.write(txtAfterTreatment)
         
 def askForMainAction() :
