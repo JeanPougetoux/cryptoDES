@@ -21,10 +21,9 @@ ALPHABET+="\n" #caractère 64
 
 ALPHABETBINAIRE=dict()
 for i in range(0, 64) :
-	x=bin(i)
-	y='0000'+x[2:]
-	ALPHABETBINAIRE[i]=y[-5]+y[-4]+y[-3]+y[-2]+y[-1]
-
+    x=bin(i)
+    y='00000'+x[2:]
+    ALPHABETBINAIRE[i]=y[-6]+y[-5]+y[-4]+y[-3]+y[-2]+y[-1]
 
 #Renvoie a chaine de caractère txt avec uniquement les caractères de l'alphabet.
 def FiltreTXT(txt) :
@@ -50,5 +49,13 @@ def conv_bin(txt) :
 	for c in FiltreTXT(txt) : X+=ALPHABETBINAIRE[ALPHABET.find(c)]
 	return X
 
-
-	
+def conv_text(bina) :
+    X=""
+    binArray = [bina[i:i+6] for i in range(0, len(bina), 6)]
+    
+    for i in range(0, len(binArray)) :
+        for key, value in ALPHABETBINAIRE.items() :
+            if value == binArray[i] :
+                X+=ALPHABET[key]
+                
+    return X
