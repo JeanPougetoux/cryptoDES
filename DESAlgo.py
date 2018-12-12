@@ -7,24 +7,22 @@ from Extract_ConstantesDES import recupConstantesDES
 
 const = recupConstantesDES()
 
+# Convertit un nombre décimal en une chaîne binaire sur 4 caractères
 def decimalToBinary(n):
     return bin(n).replace("0b","").zfill(4)
 
-def readKey(txt) :    
-    key=dict()
-    
-    j=0
-    
+# Convertit un texte (binaire) en dictionnaire de chiffre
+# exemple : "01" -> {0: "0", 1: "1"}
+def convertStringToDict(txt) :    
+    res=dict()
+
     for i in range (0, len(txt)) :
-        key[j]=int(txt[i])
-        j+=1
+        res[i]=int(txt[i])
     
-    return key
-    
-    
-    
-    
-def permute2Matrix(matrix, permuteMatrix) :
+    return res
+
+# Permute une matrice avec une autre matrice de permutation
+def permuteTwoMatrix(matrix, permuteMatrix) :
     permuted=dict()
     
     for i in range (0, len(permuteMatrix)) :
@@ -32,8 +30,8 @@ def permute2Matrix(matrix, permuteMatrix) :
         
     return permuted
     
-    
-def splitKey(key) :
+# Sépare un dictionnaire en deux autres dictionnaires (left et right)
+def splitDict(key) :
     length = len(key)
     halfLength = length / 2
     
@@ -47,58 +45,58 @@ def splitKey(key) :
             right[i % halfLength] = key[i]
             
     return left, right
-        
-    
-    
-    
-    
-def concatenateKeys(keyLeft, keyRight) :
-    key = dict()
+
+# Concatène deux dictionnaires en un seul dictionnaire
+def concatenateDicts(dictLeft, dictRight) :
+    res = dict()
     index = 0
     
-    for i in range(0, len(keyLeft)) :
-        key[index] = keyLeft[i]
+    for i in range(0, len(dictLeft)) :
+        res[index] = dictLeft[i]
         index+=1
         
-    for i in range(0, len(keyRight)) :
-        key[index] = keyRight[i]
+    for i in range(0, len(dictRight)) :
+        res[index] = dictRight[i]
         index+=1
         
-    return key
+    return res
     
-def shiftLeft(matrix) :
-    newMatrix = dict()
+# Déplace tous les éléments vers la gauche (met à jour les index)
+# exemple : {0:"1", 1:"2", 2:"3"} -> {0:"2", 1:"3", 2:"1"}
+def shiftLeft(originalDict) :
+    res = dict()
     
-    for i in range(0, len(matrix)) :
+    for i in range(0, len(originalDict)) :
         j = i - 1
         if j == -1 :
-            j = len(matrix) - 1
-        newMatrix[j] = matrix[i]
+            j = len(originalDict) - 1
+        res[j] = originalDict[i]
         
-    return newMatrix
+    return res
 
+# Effectue le traitement permettant de récupérer les 16 sous-clés 
+# (à partir de la clé au format string)
 def getSubKeys(txt) :
-    originalKey = readKey(txt)
-    originalPermutedKey = permute2Matrix(originalKey, const["CP_1"][0])
+    originalKey = convertStringToDict(txt)
+    originalPermutedKey = permuteTwoMatrix(originalKey, const["CP_1"][0])
     
     subKeys = dict()
-    (left, right) = splitKey(originalPermutedKey)
+    (left, right) = splitDict(originalPermutedKey)
     
     for i in range(1, 17) :
         left = shiftLeft(left)
         right = shiftLeft(right)
-        tempKey = concatenateKeys(left, right)
-        permutedTempKey = permute2Matrix(tempKey, const["CP_2"][0])
+        tempKey = concatenateDicts(left, right)
+        permutedTempKey = permuteTwoMatrix(tempKey, const["CP_2"][0])
         subKeys[i] = permutedTempKey
     
     return subKeys
     
-
-
+# Va faire à partir d'une string binaire des paquets (dictionnaire) 
+# de 64 bits, complètera le dernier par des 0
 def getPacketsFromBinaryString(binaryString) :
     packets = dict()
     index = -1
-    
     
     for i in range(0, len(binaryString)) :
         if(i == 0 or i % 64 == 0) :
@@ -113,9 +111,9 @@ def getPacketsFromBinaryString(binaryString) :
         for i in range (lenLastPacket, 64) :
             packets[numbPackets - 1][i] = 0
         
-    
     return packets
 
+# Ou exclusif sur deux matrices, renvoie la nouvelle matrice
 def orOperation(matrix, otherMatrix) :
     newMatrix = dict()
     
@@ -127,6 +125,8 @@ def orOperation(matrix, otherMatrix) :
     
     return newMatrix
 
+# Inverse le ou exclusif : à partir de la matrice finale et d'une des 
+# deux matrices de départ, devine la matrice ayant permit de faire l'opération
 def reverseOrOperation(finalMatrix, oldMatrix) :
     newMatrix = dict()
     
@@ -136,8 +136,9 @@ def reverseOrOperation(finalMatrix, oldMatrix) :
         newMatrix[i] = res
     return newMatrix
         
-
-        
+# Sépare une matrice en sous-matrices contenant chacune 6 éléments (similaire
+# à getPackets mais sur une matrice, avec seulement des paquets de 6 et sans 
+# complétion des 0 à la fin)
 def getSubBlocs(matrix) :
     subBlocs = dict()
     index = 0
@@ -151,6 +152,7 @@ def getSubBlocs(matrix) :
         subBlocs[index][i%6] = matrix[i]
     return subBlocs
 
+# Effectue le traitement sur chaque bloc lors des rondes et décrit dans le cours (Rondes.3)
 def processBloc(bloc, s) :
     line=int(str(bloc[0])+str(bloc[5]), 2)
     tempColumn = ""
@@ -166,8 +168,10 @@ def processBloc(bloc, s) :
         dictBloc[i]=numb[i]
     
     return dictBloc
+
+# Traitement correspondant à une ronde dans le cours, il y en aura 16
 def ronde(left, right, key) :
-    newRight = permute2Matrix(right, const["E"][0])
+    newRight = permuteTwoMatrix(right, const["E"][0])
     newRight = orOperation(newRight, key)
     
     subBlocs = getSubBlocs(newRight)
@@ -183,13 +187,15 @@ def ronde(left, right, key) :
             newRight[indexRight] = subBlocs[i][j]
             indexRight+=1
             
-    newRight = permute2Matrix(newRight, const["PERM"][0])
+    newRight = permuteTwoMatrix(newRight, const["PERM"][0])
     newRight = orOperation(newRight, left)
     
     return(right, newRight)
 
+# Traitement permettant de "défaire" une ronde et de récupérer les parties
+# gauche et droite originelles
 def unRonde(left, right, key) :
-    oldComputedRight = permute2Matrix(left, const["E"][0])
+    oldComputedRight = permuteTwoMatrix(left, const["E"][0])
     oldComputedRight = orOperation(oldComputedRight, key)
     
     subBlocs = getSubBlocs(oldComputedRight)
@@ -205,54 +211,51 @@ def unRonde(left, right, key) :
             oldComputedRight[indexRight] = subBlocs[i][j]
             indexRight+=1
             
-    oldComputedRight = permute2Matrix(oldComputedRight, const["PERM"][0])
+    oldComputedRight = permuteTwoMatrix(oldComputedRight, const["PERM"][0])
     oldLeft = reverseOrOperation(right, oldComputedRight)
     
     return (oldLeft, left)
     
-    
-
+# Crypte une string binaire grâce à une clef
 def encryptBinaryMessage(binaryString, key) :
     subKeys = getSubKeys(key)
     packets = getPacketsFromBinaryString(binaryString)
     s=""
     
     for i in range(0, len(packets)) :
-        packets[i] = permute2Matrix(packets[i], const["PI"][0])
-        (left, right) = splitKey(packets[i]) 
+        packets[i] = permuteTwoMatrix(packets[i], const["PI"][0])
+        (left, right) = splitDict(packets[i]) 
         
         for j in range(0, 16) :
             (left, right) = ronde(left, right, subKeys[j+1])
         
-        packets[i] = concatenateKeys(left, right)
-        packets[i] = permute2Matrix(packets[i], const["PI_I"][0])
+        packets[i] = concatenateDicts(left, right)
+        packets[i] = permuteTwoMatrix(packets[i], const["PI_I"][0])
         
         for j in range(0, len(packets[i])) :
             s+=str(packets[i][j])
     return s
 
+# Décrypte une string binaire grâce à une clef
 def decryptBinaryMessage(binaryString, key) :
     subKeys = getSubKeys(key)
     packets = getPacketsFromBinaryString(binaryString)
     s=""
     
     for i in range(0, len(packets)) :
-        packets[i] = permute2Matrix(packets[i], const["PI"][0])
-        (oldLeft, oldRight) = splitKey(packets[i])
+        packets[i] = permuteTwoMatrix(packets[i], const["PI"][0])
+        (oldLeft, oldRight) = splitDict(packets[i])
         for j in range(0, 16) :
             (oldLeft, oldRight) = unRonde(oldLeft, oldRight, subKeys[16-j])
         
-        packets[i] = concatenateKeys(oldLeft, oldRight)
-        packets[i] = permute2Matrix(packets[i], const["PI_I"][0])
+        packets[i] = concatenateDicts(oldLeft, oldRight)
+        packets[i] = permuteTwoMatrix(packets[i], const["PI_I"][0])
         for j in range(0, len(packets[i])) :
             s+=str(packets[i][j])
     return conv_text(s)
         
-    
-
-    
-    
-
+# Crypte une string grâce à une clef (la convertit 
+# en binaire et appelle encryptBinaryMessage)
 def encryptRealMessage(message, key) :
     binary = conv_bin(message)
     return encryptBinaryMessage(binary, key)

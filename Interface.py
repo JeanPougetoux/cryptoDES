@@ -4,6 +4,28 @@ import DESAlgo
 from DESAlgo import encryptRealMessage
 from DESAlgo import decryptBinaryMessage
 
+# Retourn False si le texte contient autre chose que des 0 ou des 1 ; sinon True
+def checkIfBinaryString(string) :
+    for i in range (0, len(string)) :
+        if(string[i] != "0" and string[i] != "1") :
+            return False
+    return True
+
+# Retourne False si le texte contient autre chose que des 0 ou des 1
+# ou si sa longueur n'est pas congru à 0 modulo 64 ; sinon True
+def checkIfValidEncodedTxt(binaryString) :
+    if not checkIfBinaryString(binaryString) :
+        print("Le texte encodé contient autre chose que des 0 et des 1 !\n")
+        return False
+    lgth = len(binaryString) % 64 == 0
+    if not lgth :
+        print("Le texte encodé ne contient pas un multiple de 64 comme nombre de caractères !\n")
+        return False
+    return True
+
+# Demande à l'utilisateur comment il veut donner le texte, la récupère (
+# en lisant la console ou le fichier donné) puis vérifie qu'il est valide ; 
+# retourne None si l'utilisateur veut annuler, sinon le texte
 def askForText(cType) :
     while(True) :
         entry = input("\nVoulez-vous taper le texte à " + cType + " (1), ou bien donner le chemin d'un fichier le contenant (2) ? Retour : (3)\n")
@@ -28,7 +50,10 @@ def askForText(cType) :
             return None
         else :
             print("Les options autorisées sont 1, 2 et 3.\n")
-            
+
+# Demande à l'utilisateur comment il veut donner la clef, la récupère (
+# en lisant la console ou le fichier donné) puis vérifie qu'elle est valide ; 
+# retourne None si l'utilisateur veut annuler, sinon la clef
 def askForKey() :
     while(True) :
         entry = input("\nVoulez-vous taper la clef (1), ou bien donner le chemin d'un fichier la contenant (2) ? Retour : (3)\n")
@@ -36,6 +61,8 @@ def askForKey() :
             entry = input("Tapez la clef : ")
             if(len(entry) != 64) :
                 print("La clef tapée ne contient pas exactement 64 bits !\n")
+            elif(not checkIfBinaryString(entry)) :
+                print("La clef tapée contient autre chose que des 0 et des 1 !\n")
             else :
                 return entry
         elif(entry == "2") :
@@ -46,14 +73,19 @@ def askForKey() :
                 f=open(entry, "r", encoding='utf-8')
                 txt=f.read()
                 if(len(txt) != 64) :
-                    print("Le fichier existe mais la clef contenu ne contient pas exactement 64 bits !\n")
+                    print("Le fichier existe mais la clef contenue ne contient pas exactement 64 bits !\n")
+                elif not checkIfBinaryString(txt) :
+                    print("Le fichier existe mais la clef contenue contient autre chose que des 0 et des 1 !\n")
                 else :
                     return txt
         elif(entry == "3") :
             return None
         else :
             print("Les options autorisées sont 1, 2 et 3.\n")
-        
+
+# Appelle les méthodes qui récupéreront auprès de l'utilisateur
+# le texte à crypter/décrypter et la clef ; retourne (None, None)
+# si une erreur est survenue
 def askForTextAndKey(cType) :
     text = askForText(cType)
     if text is None :
@@ -63,6 +95,9 @@ def askForTextAndKey(cType) :
         return (None, None)
     return (text, key)
 
+# Demande à l'utilisateur ou il veut que le résultat du traitement
+# s'affiche, puis retourne 0 pour console, une string pour le nom du fichier
+# ou None si il veut annuler
 def askForOutput() :
     while(True) :
         entry = input("\nVoulez-vous afficher la sortie dans la console (1), ou bien dans un fichier de sortie (2) ? Retour : (3)\n")
@@ -78,7 +113,9 @@ def askForOutput() :
             return None
         else :
             print("Les options autorisées sont 1, 2 et 3.\n")
-            
+
+# Affiche à l'utilisateur le résultat du traitement selon
+# ses préférences : dans la console ou dans un fichier
 def displayToUser(txtAfterTreatment) :
     output = askForOutput()
     if (output is None) : return
@@ -88,6 +125,8 @@ def displayToUser(txtAfterTreatment) :
         f=open(output,"w+", encoding='utf-8')
         f.write(txtAfterTreatment)
         
+# Demande l'action principale à l'utilisateur (chiffre, déchiffrer ou quitter) et
+# appelle les traitements selon ce qu'il choisira
 def askForMainAction() :
     entry = input("\nVoulez-vous chiffrer (1) ou déchiffrer (2) ? Quitter : (3)\n")
     (text, key) = (None, None)
@@ -99,12 +138,14 @@ def askForMainAction() :
     elif(entry == "2") :
         (text, key) = askForTextAndKey("déchiffrer")
         if text is None or key is None : return
+        if not checkIfValidEncodedTxt(text) : return
         displayToUser(decryptBinaryMessage(text, key))
     elif(entry == "3") :
         exit()
     else :
         print("Les options autorisées sont 1, 2 et 3.\n")
 
+# Méthode d'entrée de l'application
 def interface() :
     while(True) :
         askForMainAction()
