@@ -228,7 +228,6 @@ def encryptBinaryMessage(binaryString, key) :
 def decryptBinaryMessage(binaryString, key) :
     subKeys = getSubKeys(key)
     packets = getPacketsFromBinaryString(binaryString)
-    s=""
     
     for i in range(0, len(packets)) :
         packets[i] = permuteTwoMatrix(packets[i], const["PI"][0])
@@ -239,11 +238,7 @@ def decryptBinaryMessage(binaryString, key) :
         
         packets[i] = concatenateDicts(oldLeft, oldRight)
         packets[i] = permuteTwoMatrix(packets[i], const["PI_I"][0])
-        s+=" oldD="
-        for j in range(0, len(packets[i])) :
-            s+=str(packets[i][j])
-
-        print(s)
+        
         for j in range(0, len(packets[i])) :
             s+=str(packets[i][j])
     return conv_text(s)
@@ -253,5 +248,3 @@ def decryptBinaryMessage(binaryString, key) :
 def encryptRealMessage(message, key) :
     binary = conv_bin(message)
     return encryptBinaryMessage(binary, key)
-
-decryptBinaryMessage("1000100000110110101000010001001111001011011000001001010010010000", "0101111001011011010100100111111101010001000110101011110010010001")
