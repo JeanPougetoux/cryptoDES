@@ -191,7 +191,7 @@ def unRonde(left, right, key) :
     
     for i in range(0, len(subBlocs)) :
         subBlocs[i]=processBloc(subBlocs[i], const["S"][i])
-        
+    
     oldComputedRight = dict()
     indexRight = 0
     
@@ -199,7 +199,7 @@ def unRonde(left, right, key) :
         for j in range(0, len(subBlocs[i])) :
             oldComputedRight[indexRight] = subBlocs[i][j]
             indexRight+=1
-            
+    
     oldComputedRight = permuteTwoMatrix(oldComputedRight, const["PERM"][0])
     oldLeft = orOperation(right, oldComputedRight)
     
@@ -209,7 +209,6 @@ def unRonde(left, right, key) :
 def encryptBinaryMessage(binaryString, key) :
     subKeys = getSubKeys(key)
     packets = getPacketsFromBinaryString(binaryString)
-    s=""
     
     for i in range(0, len(packets)) :
         packets[i] = permuteTwoMatrix(packets[i], const["PI"][0])
@@ -234,11 +233,17 @@ def decryptBinaryMessage(binaryString, key) :
     for i in range(0, len(packets)) :
         packets[i] = permuteTwoMatrix(packets[i], const["PI"][0])
         (oldLeft, oldRight) = splitDict(packets[i])
+        
         for j in range(0, 16) :
             (oldLeft, oldRight) = unRonde(oldLeft, oldRight, subKeys[16-j])
         
         packets[i] = concatenateDicts(oldLeft, oldRight)
         packets[i] = permuteTwoMatrix(packets[i], const["PI_I"][0])
+        s+=" oldD="
+        for j in range(0, len(packets[i])) :
+            s+=str(packets[i][j])
+
+        print(s)
         for j in range(0, len(packets[i])) :
             s+=str(packets[i][j])
     return conv_text(s)
@@ -248,3 +253,5 @@ def decryptBinaryMessage(binaryString, key) :
 def encryptRealMessage(message, key) :
     binary = conv_bin(message)
     return encryptBinaryMessage(binary, key)
+
+decryptBinaryMessage("1000100000110110101000010001001111001011011000001001010010010000", "0101111001011011010100100111111101010001000110101011110010010001")
