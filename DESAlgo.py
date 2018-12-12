@@ -124,17 +124,6 @@ def orOperation(matrix, otherMatrix) :
         newMatrix[i] = res
     
     return newMatrix
-
-# Inverse le ou exclusif : à partir de la matrice finale et d'une des 
-# deux matrices de départ, devine la matrice ayant permit de faire l'opération
-def reverseOrOperation(finalMatrix, oldMatrix) :
-    newMatrix = dict()
-    
-    for i in range(0, len(finalMatrix)) :
-        res = int(finalMatrix[i]) - int(oldMatrix[i])
-        res = res**2
-        newMatrix[i] = res
-    return newMatrix
         
 # Sépare une matrice en sous-matrices contenant chacune 6 éléments (similaire
 # à getPackets mais sur une matrice, avec seulement des paquets de 6 et sans 
@@ -212,7 +201,7 @@ def unRonde(left, right, key) :
             indexRight+=1
             
     oldComputedRight = permuteTwoMatrix(oldComputedRight, const["PERM"][0])
-    oldLeft = reverseOrOperation(right, oldComputedRight)
+    oldLeft = orOperation(right, oldComputedRight)
     
     return (oldLeft, left)
     
