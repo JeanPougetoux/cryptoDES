@@ -2,7 +2,7 @@ import ConvAlphaBin
 import Extract_ConstantesDES
 
 from ConvAlphaBin import conv_bin
-from ConvAlphaBin import conv_text
+from ConvAlphaBin import nib_vnoc
 from Extract_ConstantesDES import recupConstantesDES
 
 const = recupConstantesDES()
@@ -228,6 +228,7 @@ def encryptBinaryMessage(binaryString, key) :
 def decryptBinaryMessage(binaryString, key) :
     subKeys = getSubKeys(key)
     packets = getPacketsFromBinaryString(binaryString)
+    s = ""
     
     for i in range(0, len(packets)) :
         packets[i] = permuteTwoMatrix(packets[i], const["PI"][0])
@@ -241,10 +242,18 @@ def decryptBinaryMessage(binaryString, key) :
         
         for j in range(0, len(packets[i])) :
             s+=str(packets[i][j])
-    return conv_text(s)
+    return nib_vnoc(s)
         
+# Décrypte une string grâce à une clef (la convertit 
+# en binaire et appelle decryptBinaryMessage)
+def decryptRealMessage(message, key) :
+    binary = conv_bin(message)
+    return decryptBinaryMessage(binary, key)
+
 # Crypte une string grâce à une clef (la convertit 
 # en binaire et appelle encryptBinaryMessage)
 def encryptRealMessage(message, key) :
     binary = conv_bin(message)
     return encryptBinaryMessage(binary, key)
+
+

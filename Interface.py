@@ -2,25 +2,13 @@ import os.path
 import DESAlgo
 
 from DESAlgo import encryptRealMessage
-from DESAlgo import decryptBinaryMessage
+from DESAlgo import decryptRealMessage
 
 # Retourn False si le texte contient autre chose que des 0 ou des 1 ; sinon True
 def checkIfBinaryString(string) :
     for i in range (0, len(string)) :
         if(string[i] != "0" and string[i] != "1") :
             return False
-    return True
-
-# Retourne False si le texte contient autre chose que des 0 ou des 1
-# ou si sa longueur n'est pas congru à 0 modulo 64 ; sinon True
-def checkIfValidEncodedTxt(binaryString) :
-    if not checkIfBinaryString(binaryString) :
-        print("Le texte encodé contient autre chose que des 0 et des 1 !\n")
-        return False
-    lgth = len(binaryString) % 64 == 0
-    if not lgth :
-        print("Le texte encodé ne contient pas un multiple de 64 comme nombre de caractères !\n")
-        return False
     return True
 
 # Demande à l'utilisateur comment il veut donner le texte, la récupère (
@@ -40,7 +28,7 @@ def askForText(cType) :
             if not os.path.isfile(entry) :
                 print("Le fichier de ce nom n'existe pas !\n")
             else :
-                f=open(entry, "r", encoding='utf-8')
+                f=open(entry, "r")
                 txt=f.read()
                 if(len(txt) == 0) :
                     print("Le fichier existe mais ne contient aucun caractère !\n")
@@ -70,7 +58,7 @@ def askForKey() :
             if not os.path.isfile(entry) :
                 print("Le fichier de ce nom n'existe pas !\n")
             else :
-                f=open(entry, "r", encoding='utf-8')
+                f=open(entry, "r")
                 txt=f.read()
                 if(len(txt) != 64) :
                     print("Le fichier existe mais la clef contenue ne contient pas exactement 64 bits !\n")
@@ -138,8 +126,7 @@ def askForMainAction() :
     elif(entry == "2") :
         (text, key) = askForTextAndKey("déchiffrer")
         if text is None or key is None : return
-        if not checkIfValidEncodedTxt(text) : return
-        displayToUser(decryptBinaryMessage(text, key))
+        displayToUser(decryptRealMessage(text, key))
     elif(entry == "3") :
         exit()
     else :
