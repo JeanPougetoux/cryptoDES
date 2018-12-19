@@ -209,6 +209,7 @@ def unRonde(left, right, key) :
 def encryptBinaryMessage(binaryString, key) :
     subKeys = getSubKeys(key)
     packets = getPacketsFromBinaryString(binaryString)
+    s = ""
     
     for i in range(0, len(packets)) :
         packets[i] = permuteTwoMatrix(packets[i], const["PI"][0])
@@ -222,7 +223,7 @@ def encryptBinaryMessage(binaryString, key) :
         
         for j in range(0, len(packets[i])) :
             s+=str(packets[i][j])
-    return s
+    return nib_vnoc(s)
 
 # Décrypte une string binaire grâce à une clef
 def decryptBinaryMessage(binaryString, key) :
