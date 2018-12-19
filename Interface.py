@@ -28,8 +28,12 @@ def askForText(cType) :
             if not os.path.isfile(entry) :
                 print("Le fichier de ce nom n'existe pas !\n")
             else :
-                f=open(entry, "r", encoding='utf-8-sig')
-                txt=f.read()
+                try :
+                    f=open(entry, "r", encoding='utf-8-sig')
+                    txt=f.read()
+                except UnicodeDecodeError :
+                    f=open(entry, "r")
+                    txt=f.read()
                 if(len(txt) == 0) :
                     print("Le fichier existe mais ne contient aucun caractère !\n")
                 else :
@@ -58,8 +62,12 @@ def askForKey() :
             if not os.path.isfile(entry) :
                 print("Le fichier de ce nom n'existe pas !\n")
             else :
-                f=open(entry, "r", encoding='utf-8-sig')
-                txt=f.read()
+                try :
+                    f=open(entry, "r", encoding='utf-8-sig')
+                    txt=f.read()
+                except UnicodeDecodeError :
+                    f=open(entry, "r")
+                    txt=f.read()
                 if(len(txt) != 64) :
                     print("Le fichier existe mais la clef contenue ne contient pas exactement 64 bits !\n")
                 elif not checkIfBinaryString(txt) :

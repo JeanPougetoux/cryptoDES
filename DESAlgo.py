@@ -158,8 +158,9 @@ def processBloc(bloc, s) :
     
     return dictBloc
 
-# Traitement correspondant à une ronde dans le cours, il y en aura 16
-def ronde(left, right, key) :
+# Action permettant de générer la nouvelle partie droite
+# à partir de l'ancienne partie droite (utilisé par ronde et unRonde)
+def rightPartAction(right, key) :
     newRight = permuteTwoMatrix(right, const["E"][0])
     newRight = orOperation(newRight, key)
     
@@ -167,7 +168,7 @@ def ronde(left, right, key) :
     
     for i in range(0, len(subBlocs)) :
         subBlocs[i]=processBloc(subBlocs[i], const["S"][i])
-        
+    
     newRight = dict()
     indexRight = 0
     
@@ -177,6 +178,13 @@ def ronde(left, right, key) :
             indexRight+=1
             
     newRight = permuteTwoMatrix(newRight, const["PERM"][0])
+    
+    return newRight
+    
+# Traitement correspondant à une ronde dans le cours, il y en aura 16
+def ronde(left, right, key) :
+    newRight = rightPartAction(right, key)        
+        
     newRight = orOperation(newRight, left)
     
     return(right, newRight)
@@ -184,29 +192,15 @@ def ronde(left, right, key) :
 # Traitement permettant de "défaire" une ronde et de récupérer les parties
 # gauche et droite originelles
 def unRonde(left, right, key) :
-    oldComputedRight = permuteTwoMatrix(left, const["E"][0])
-    oldComputedRight = orOperation(oldComputedRight, key)
+    oldComputedRight = rightPartAction(left, key)
     
-    subBlocs = getSubBlocs(oldComputedRight)
-    
-    for i in range(0, len(subBlocs)) :
-        subBlocs[i]=processBloc(subBlocs[i], const["S"][i])
-    
-    oldComputedRight = dict()
-    indexRight = 0
-    
-    for i in range(0, len(subBlocs)) :
-        for j in range(0, len(subBlocs[i])) :
-            oldComputedRight[indexRight] = subBlocs[i][j]
-            indexRight+=1
-    
-    oldComputedRight = permuteTwoMatrix(oldComputedRight, const["PERM"][0])
     oldLeft = orOperation(right, oldComputedRight)
     
     return (oldLeft, left)
-    
-# Crypte une string binaire grâce à une clef
-def encryptBinaryMessage(binaryString, key) :
+
+# Permet de crypter (action = c) ou décrypter (action = d)
+# un message binaire à partir d'une clef
+def actionForBinaryMessage(binaryString, key, action) :
     subKeys = getSubKeys(key)
     packets = getPacketsFromBinaryString(binaryString)
     s = ""
@@ -216,29 +210,12 @@ def encryptBinaryMessage(binaryString, key) :
         (left, right) = splitDict(packets[i]) 
         
         for j in range(0, 16) :
-            (left, right) = ronde(left, right, subKeys[j+1])
-        
+            if(action == "c") :
+                (left, right) = ronde(left, right, subKeys[j+1])
+            elif(action == "d") :
+                (left, right) = unRonde(left, right, subKeys[16-j])
+                
         packets[i] = concatenateDicts(left, right)
-        packets[i] = permuteTwoMatrix(packets[i], const["PI_I"][0])
-        
-        for j in range(0, len(packets[i])) :
-            s+=str(packets[i][j])
-    return nib_vnoc(s)
-
-# Décrypte une string binaire grâce à une clef
-def decryptBinaryMessage(binaryString, key) :
-    subKeys = getSubKeys(key)
-    packets = getPacketsFromBinaryString(binaryString)
-    s = ""
-    
-    for i in range(0, len(packets)) :
-        packets[i] = permuteTwoMatrix(packets[i], const["PI"][0])
-        (oldLeft, oldRight) = splitDict(packets[i])
-        
-        for j in range(0, 16) :
-            (oldLeft, oldRight) = unRonde(oldLeft, oldRight, subKeys[16-j])
-        
-        packets[i] = concatenateDicts(oldLeft, oldRight)
         packets[i] = permuteTwoMatrix(packets[i], const["PI_I"][0])
         
         for j in range(0, len(packets[i])) :
@@ -249,12 +226,12 @@ def decryptBinaryMessage(binaryString, key) :
 # en binaire et appelle decryptBinaryMessage)
 def decryptRealMessage(message, key) :
     binary = conv_bin(message)
-    return decryptBinaryMessage(binary, key)
+    return actionForBinaryMessage(binary, key, "d")
 
 # Crypte une string grâce à une clef (la convertit 
 # en binaire et appelle encryptBinaryMessage)
 def encryptRealMessage(message, key) :
     binary = conv_bin(message)
-    return encryptBinaryMessage(binary, key)
+    return actionForBinaryMessage(binary, key, "c")
 
 
